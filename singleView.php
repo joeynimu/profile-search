@@ -11,18 +11,31 @@ $jsonData = file_get_contents($fileURL);
 <head>
 <meta charset="utf-8">
 <title>Sample Intelligent Search</title>
-<link rel="stylesheet" href="assets/css/style.css"/>	
+<link rel="stylesheet" href="assets/css/style.css"/>  
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
 <script src="assets/js/jquery-1.10.2.js"></script>
 <script src="assets/js/jquery-ui.js"></script>
 <script src="assets/js/storage.js"></script>
 
 </head>
  <body>
- <div class="pageContent">  
+   <header>
+      <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">Simple Search Engine</a>
+        </div>
+
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="index.php"><i class="fa fa-home"></i> Home</a></li>
+        </ul>
+      </div>
+      </nav>
+    </header>
+ <div class="container">  
   <!-- content -->
-  <a href="index.php"> Home </a>
-  <br>
+  
   <div class="generalWrapper"> 
   <div class="people">
    <!-- loop through data and display profiles -->
@@ -31,22 +44,33 @@ $jsonData = file_get_contents($fileURL);
     {    
       $jsonParsed=json_decode($jsonData, true);
       //get total users
-      $totalUsers = $jsonParsed[total];
-      //get the result set
-      $resultSet =  $jsonParsed[result];
+      //get total users
+      //HOWEVER< THE PEOPLE JSON FILE HAS DATA THAT IS TRUNCATED AND I HAD TO REPAIR IT A BIT
+      //HENCE, we are going to hard code the total users to match what is on the file
+      // $totalUsers = $jsonParsed['total'];
 
-      //loop and get sample data
+      $totalUsers = 103;
+
+      //get the result set
+      $resultSet =  $jsonParsed['result'];
+
+      //loop and get data; using a few fields here
       for ($i=0; $i < $totalUsers; $i++) { 
-      	 $oneUserId = $resultSet[$i][id];
+        
+         $oneUserObject = $resultSet[$i];
+
+       if(isset($oneUserObject) && $oneUserObject!='')
+         {
+          $oneUserId = $oneUserObject['id'];
           //only show the requested user
-      	if($oneUserId==$userId)
-      	{
-         $oneUserPic = $resultSet[$i][picture];
-         $oneUserName = $resultSet[$i][name];
-         $oneUserGender = $resultSet[$i][gender];
-         $oneUserCompany = $resultSet[$i][company];
-         $oneUserPhone = $resultSet[$i][phone];
-         $oneUserAbout = $resultSet[$i][about];
+        if(isset($oneUserId) && $oneUserId==$userId)
+        {
+         $oneUserPic = $oneUserObject['picture'];
+         $oneUserName = $oneUserObject['name'];
+         $oneUserGender = $oneUserObject['gender'];
+         $oneUserCompany = $oneUserObject['company'];
+         $oneUserPhone = $oneUserObject['phone'];
+         $oneUserAbout = $oneUserObject['about'];
 
          ?>
          <script type="text/javascript">
@@ -72,6 +96,7 @@ $jsonData = file_get_contents($fileURL);
           </div>
         </div>       
          <?php
+        }
        }
       }
     }  
@@ -105,25 +130,25 @@ $jsonData = file_get_contents($fileURL);
 
            var countSuggestions = 0, suggestionsString = "";
            for (var i =0; i < dataToParse.length; i++) {
-           	   
-           	   if(countSuggestions<3)
-           	   {
-           	      singleGender = dataToParse[i].gender;
-           	      //check  if this user's attributes are part of our suggestion criteria
-           	      if(userAttributes.indexOf(singleGender) >-1)
-           	      { 
-           	      	countSuggestions+=1;
-           	      	//show this user
+               
+               if(countSuggestions<3)
+               {
+                  singleGender = dataToParse[i].gender;
+                  //check  if this user's attributes are part of our suggestion criteria
+                  if(typeof singleGender != 'undefined' && userAttributes.indexOf(singleGender) >-1)
+                  { 
+                    countSuggestions+=1;
+                    //show this user
                       console.log("TO SUGGEST: "+dataToParse[i].name);
                       suggestionsString = suggestionsString+'<br>Based on gender clicked earlier <br><a href="singleView.php?id='+dataToParse[i].id+'">'+dataToParse[i].name+'</a>';
-           	      }
-           	  }
-           	  else
-           	  {
-           	  	//enough suggestions; break loop
-           	  	console.log("TO BREAK LOOP: ");
-           	  	break;
-           	  }
+                  }
+              }
+              else
+              {
+                //enough suggestions; break loop
+                console.log("TO BREAK LOOP: ");
+                break;
+              }
            }
 
           $("#suggestionsZone").html("People you may know: <br><br> "+suggestionsString);
