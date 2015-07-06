@@ -21,18 +21,31 @@ $jsonData = file_get_contents($fileURL);
 <head>
 <meta charset="utf-8">
 <title>Sample Intelligent Search</title>
-<link rel="stylesheet" href="assets/css/style.css"/>	
+<link rel="stylesheet" href="assets/css/style.css"/>  
 <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
- <script src="assets/js/jquery-1.10.2.js"></script>
-  <script src="assets/js/jquery-ui.js"></script>
-  <script src="assets/js/storage.js"></script>
+<script src="assets/js/jquery-1.10.2.js"></script>
+<script src="assets/js/jquery-ui.js"></script>
+<script src="assets/js/storage.js"></script>
+<link rel="stylesheet" href="//netdna.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" />
 
 </head>
  <body>
- <div class="pageContent">  
+   <header>
+      <nav class="navbar navbar-default">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="/">Simple Search Engine</a>
+        </div>
+
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="index.php"><i class="fa fa-home"></i> Home</a></li>
+        </ul>
+      </div>
+      </nav>
+    </header>
+ <div class="container">  
   <!-- content -->
-  <a href="index.php"> Home </a>
-  <br>
+ 
   <div class="generalWrapper"> 
   <div class="people">
    <!-- loop through data and display profiles -->
@@ -40,28 +53,38 @@ $jsonData = file_get_contents($fileURL);
     if(isset($userIds) && $userIds!='')
     {    
       $jsonParsed=json_decode($jsonData, true);
+ 
       //get total users
-      $totalUsers = $jsonParsed[total];
-      //get the result set
-      $resultSet =  $jsonParsed[result];
+      //HOWEVER< THE PEOPLE JSON FILE HAS DATA THAT IS TRUNCATED AND I HAD TO REPAIR IT A BIT
+      //HENCE, we are going to hard code the total users to match what is on the file
+      // $totalUsers = $jsonParsed['total'];
 
-      //loop and get sample data
+      $totalUsers = 103;
+
+      //get the result set
+      $resultSet =  $jsonParsed['result'];
+
+      //loop and get data; using a few fields here
       for ($i=0; $i < $totalUsers; $i++) { 
-      	 $oneUserId = $resultSet[$i][id];
+        
+         $oneUserObject = $resultSet[$i];
+
+         if(isset($oneUserObject) && $oneUserObject!='')
+         {
+
+         $oneUserId = $oneUserObject['id'];
           
       //confirm that the current user is part of search results. Check by their id
-      if($oneUserId!='')
+      if(isset($oneUserId) && $oneUserId!='')
       {
         if(in_array($oneUserId, $userIds))
         {      
-         $oneUserPic = $resultSet[$i][picture];
-         $oneUserName = $resultSet[$i][name];
-         $oneUserGender = $resultSet[$i][gender];
-         $oneUserCompany = $resultSet[$i][company];
-         $oneUserPhone = $resultSet[$i][phone];
-         $oneUserAbout = $resultSet[$i][about];
-
-         //save the gender to local storage; will be used for profile suggestions
+         $oneUserGender = $oneUserObject['gender'];
+         $oneUserAbout = $oneUserObject['about'];
+         $oneUserPic = $oneUserObject['picture'];
+         $oneUserName = $oneUserObject['name'];
+         $oneUserCompany = $oneUserObject['company'];
+         $oneUserPhone = $oneUserObject['phone'];
 
          ?>
         <a href="singleView.php?id=<?php echo $oneUserId; ?>" class="noHighlight">
@@ -82,6 +105,7 @@ $jsonData = file_get_contents($fileURL);
         </div>  
         </a>     
          <?php
+         }
         }
        }
       }
@@ -120,7 +144,7 @@ $jsonData = file_get_contents($fileURL);
                {
                   singleGender = dataToParse[i].gender;
                   //check  if this user's attributes are part of our suggestion criteria
-                  if(userAttributes.indexOf(singleGender) >-1)
+                  if(typeof singleGender != 'undefined' && userAttributes.indexOf(singleGender) >-1)
                   { 
                     countSuggestions+=1;
                     //show this user
